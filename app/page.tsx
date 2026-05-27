@@ -18,15 +18,15 @@ const contasIniciais = [
   { id: 12, categoria: 'Empréstimo', nome: 'Denilson', valor: 1040.00, vencimento: '2026-06-08', status: 'EM ABERTO', obs: 'Inclui juros de 30%' },
 ];
 
-function moeda(valor) {
+function moeda(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-function dataBR(data) {
+function dataBR(data: string) {
   return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
 }
 
-function alerta(conta) {
+function alerta(conta: any) {
   if (conta.status === 'PAGO') return { texto: 'Pago', cor: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/30' };
   const hoje = new Date('2026-06-01T00:00:00');
   const venc = new Date(conta.vencimento + 'T00:00:00');
