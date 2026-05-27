@@ -75,7 +75,7 @@ export default function AppFinanceiroPremiumAlpha() {
     return { total, aberto, pago, qtdAberto };
   }, [contas]);
 
-  function alternarStatus(id) {
+  function alternarStatus(id: number) {
     setContas((atuais) => atuais.map((conta) => conta.id === id ? { ...conta, status: conta.status === 'PAGO' ? 'EM ABERTO' : 'PAGO' } : conta));
   }
 
