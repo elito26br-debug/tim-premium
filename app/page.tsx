@@ -19,6 +19,30 @@ const contasIniciais = [
   { id: 12, categoria: 'Empréstimo', nome: 'Denilson', valor: 1040.00, vencimento: '2026-06-08', status: 'EM ABERTO', obs: 'Inclui juros de 30%' },
 ];
 
+const cartoesIniciais = [
+  {
+    id: 1,
+    nome: 'Nubank',
+    limite: 350,
+    usado: 352,
+    vencimento: '10',
+  },
+  {
+    id: 2,
+    nome: 'Caixa',
+    limite: 1800,
+    usado: 1851,
+    vencimento: '01',
+  },
+  {
+    id: 3,
+    nome: 'Brasil Card',
+    limite: 100,
+    usado: 0,
+    vencimento: '20',
+  },
+];
+
 function moeda(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
