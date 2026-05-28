@@ -131,7 +131,7 @@ export default function AppFinanceiroPremiumAlpha() {
     setModalAberto(false);
   }
 
-  function editarConta(conta) {
+  function editarConta(conta: any) { 
     setEditandoId(conta.id);
     setNovaConta({
       nome: conta.nome,
