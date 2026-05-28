@@ -31,7 +31,7 @@ function alerta(conta: any) {
   if (conta.status === 'PAGO') return { texto: 'Pago', cor: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/30' };
   const hoje = new Date('2026-06-01T00:00:00');
   const venc = new Date(conta.vencimento + 'T00:00:00');
-  const dias = Math.ceil((venc - hoje) / (1000 * 60 * 60 * 24));
+  const dias = Math.ceil((venc.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
   if (dias < 0) return { texto: 'Vencida', cor: 'text-red-400', bg: 'bg-red-500/10 border-red-500/30' };
   if (dias <= 5) return { texto: 'Vence em breve', cor: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/30' };
   return { texto: 'Em aberto', cor: 'text-blue-300', bg: 'bg-blue-500/10 border-blue-500/30' };
