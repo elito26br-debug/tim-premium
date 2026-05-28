@@ -102,13 +102,13 @@ export default function AppFinanceiroPremiumAlpha() {
         atuais.map((conta) =>
           conta.id === editandoId
             ? {
-                ...conta,
-                categoria: novaConta.categoria,
-                nome: novaConta.nome,
-                valor: Number(novaConta.valor),
-                vencimento: novaConta.vencimento,
-                obs: novaConta.obs,
-              }
+              ...conta,
+              categoria: novaConta.categoria,
+              nome: novaConta.nome,
+              valor: Number(novaConta.valor),
+              vencimento: novaConta.vencimento,
+              obs: novaConta.obs,
+            }
             : conta
         )
       );
