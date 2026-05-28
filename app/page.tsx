@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CreditCard, Wallet, AlertTriangle, CheckCircle2, CalendarDays, Plus, Search, TrendingDown, PieChart, Smartphone } from 'lucide-react';
@@ -18,19 +19,19 @@ const contasIniciais = [
   { id: 12, categoria: 'Empréstimo', nome: 'Denilson', valor: 1040.00, vencimento: '2026-06-08', status: 'EM ABERTO', obs: 'Inclui juros de 30%' },
 ];
 
-function moeda(valor: number) {
+function moeda(valor) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-function dataBR(data: string) {
+function dataBR(data) {
   return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
 }
 
-function alerta(conta: any) {
+function alerta(conta) {
   if (conta.status === 'PAGO') return { texto: 'Pago', cor: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/30' };
   const hoje = new Date('2026-06-01T00:00:00');
   const venc = new Date(conta.vencimento + 'T00:00:00');
-  const dias = Math.ceil((venc.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+  const dias = Math.ceil((venc - hoje) / (1000 * 60 * 60 * 24));
   if (dias < 0) return { texto: 'Vencida', cor: 'text-red-400', bg: 'bg-red-500/10 border-red-500/30' };
   if (dias <= 5) return { texto: 'Vence em breve', cor: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/30' };
   return { texto: 'Em aberto', cor: 'text-blue-300', bg: 'bg-blue-500/10 border-blue-500/30' };
@@ -40,6 +41,8 @@ export default function AppFinanceiroPremiumAlpha() {
   const [contas, setContas] = useState(contasIniciais);
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState('TODAS');
+  const [receitas, setReceitas] = useState({ salario: 0, valeAlimentacao: 0, extras: 0 });
+  const [modalReceitasAberto, setModalReceitasAberto] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
   const [editandoId, setEditandoId] = useState(null);
   const [novaConta, setNovaConta] = useState({
@@ -52,14 +55,24 @@ export default function AppFinanceiroPremiumAlpha() {
 
   useEffect(() => {
     const contasSalvas = localStorage.getItem('alpha-finance-contas');
+    const receitasSalvas = localStorage.getItem('alpha-finance-receitas');
+
     if (contasSalvas) {
       setContas(JSON.parse(contasSalvas));
+    }
+
+    if (receitasSalvas) {
+      setReceitas(JSON.parse(receitasSalvas));
     }
   }, []);
 
   useEffect(() => {
     localStorage.setItem('alpha-finance-contas', JSON.stringify(contas));
-  }, [contas]);
+  }, [contas, receitas]);
+
+  useEffect(() => {
+    localStorage.setItem('alpha-finance-receitas', JSON.stringify(receitas));
+  }, [receitas]);
 
   const contasFiltradas = contas.filter((conta) => {
     const combinaBusca = conta.nome.toLowerCase().includes(busca.toLowerCase()) || conta.categoria.toLowerCase().includes(busca.toLowerCase());
@@ -72,10 +85,12 @@ export default function AppFinanceiroPremiumAlpha() {
     const aberto = contas.filter((item) => item.status === 'EM ABERTO').reduce((soma, item) => soma + Number(item.valor || 0), 0);
     const pago = contas.filter((item) => item.status === 'PAGO').reduce((soma, item) => soma + Number(item.valor || 0), 0);
     const qtdAberto = contas.filter((item) => item.status === 'EM ABERTO').length;
-    return { total, aberto, pago, qtdAberto };
+    const totalReceitas = Number(receitas.salario || 0) + Number(receitas.valeAlimentacao || 0) + Number(receitas.extras || 0);
+    const saldoFinal = totalReceitas - aberto;
+    return { total, aberto, pago, qtdAberto, totalReceitas, saldoFinal };
   }, [contas]);
 
-  function alternarStatus(id: number) {
+  function alternarStatus(id) {
     setContas((atuais) => atuais.map((conta) => conta.id === id ? { ...conta, status: conta.status === 'PAGO' ? 'EM ABERTO' : 'PAGO' } : conta));
   }
 
@@ -116,7 +131,7 @@ export default function AppFinanceiroPremiumAlpha() {
     setModalAberto(false);
   }
 
-  function editarConta(conta: any) {
+  function editarConta(conta) {
     setEditandoId(conta.id);
     setNovaConta({
       nome: conta.nome,
@@ -128,7 +143,7 @@ export default function AppFinanceiroPremiumAlpha() {
     setModalAberto(true);
   }
 
-  function apagarConta(id: number) {
+  function apagarConta(id) {
     setContas((atuais) => atuais.filter((conta) => conta.id !== id));
   }
 
@@ -156,20 +171,20 @@ export default function AppFinanceiroPremiumAlpha() {
         <section className="grid md:grid-cols-4 gap-4 mb-8">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl p-5 bg-gradient-to-br from-purple-700 to-zinc-950 border border-purple-500/30 shadow-xl">
             <Wallet className="text-purple-200 mb-4" />
-            <p className="text-zinc-300">Total do mês</p>
-            <h2 className="text-3xl font-black mt-1">{moeda(resumo.total)}</h2>
+            <p className="text-zinc-300">Receitas do mês</p>
+            <h2 className="text-3xl font-black mt-1">{moeda(resumo.totalReceitas)}</h2>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="rounded-3xl p-5 bg-zinc-950 border border-yellow-500/30 shadow-xl">
             <AlertTriangle className="text-yellow-400 mb-4" />
-            <p className="text-zinc-300">Em aberto</p>
+            <p className="text-zinc-300">Contas em aberto</p>
             <h2 className="text-3xl font-black mt-1 text-yellow-400">{moeda(resumo.aberto)}</h2>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-3xl p-5 bg-zinc-950 border border-emerald-500/30 shadow-xl">
-            <CheckCircle2 className="text-emerald-400 mb-4" />
-            <p className="text-zinc-300">Pago</p>
-            <h2 className="text-3xl font-black mt-1 text-emerald-400">{moeda(resumo.pago)}</h2>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={`rounded-3xl p-5 bg-zinc-950 border shadow-xl ${resumo.saldoFinal >= 0 ? 'border-emerald-500/30' : 'border-red-500/30'}`}>
+            <CheckCircle2 className={resumo.saldoFinal >= 0 ? 'text-emerald-400 mb-4' : 'text-red-400 mb-4'} />
+            <p className="text-zinc-300">Saldo previsto</p>
+            <h2 className={`text-3xl font-black mt-1 ${resumo.saldoFinal >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{moeda(resumo.saldoFinal)}</h2>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="rounded-3xl p-5 bg-zinc-950 border border-red-500/30 shadow-xl">
@@ -177,6 +192,37 @@ export default function AppFinanceiroPremiumAlpha() {
             <p className="text-zinc-300">Contas abertas</p>
             <h2 className="text-3xl font-black mt-1 text-red-400">{resumo.qtdAberto}</h2>
           </motion.div>
+        </section>
+
+        <section className="rounded-3xl bg-zinc-950 border border-zinc-800 p-5 md:p-6 shadow-2xl mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+            <div>
+              <h2 className="text-2xl font-black">Entradas do mês</h2>
+              <p className="text-zinc-400 text-sm mt-1">Salário, vale alimentação e dinheiro extra fora do salário.</p>
+            </div>
+            <button onClick={() => setModalReceitasAberto(true)} className="bg-emerald-600 hover:bg-emerald-700 px-5 py-3 rounded-2xl font-bold">
+              Editar entradas
+            </button>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-4">
+            <div className="bg-black rounded-2xl p-4 border border-zinc-800">
+              <p className="text-zinc-400">Salário</p>
+              <p className="text-2xl font-black mt-1">{moeda(Number(receitas.salario || 0))}</p>
+            </div>
+            <div className="bg-black rounded-2xl p-4 border border-zinc-800">
+              <p className="text-zinc-400">Vale alimentação</p>
+              <p className="text-2xl font-black mt-1">{moeda(Number(receitas.valeAlimentacao || 0))}</p>
+            </div>
+            <div className="bg-black rounded-2xl p-4 border border-zinc-800">
+              <p className="text-zinc-400">Extras</p>
+              <p className="text-2xl font-black mt-1">{moeda(Number(receitas.extras || 0))}</p>
+            </div>
+            <div className="bg-emerald-500/10 rounded-2xl p-4 border border-emerald-500/30">
+              <p className="text-zinc-300">Total recebido</p>
+              <p className="text-2xl font-black mt-1 text-emerald-400">{moeda(resumo.totalReceitas)}</p>
+            </div>
+          </div>
         </section>
 
         <section className="grid lg:grid-cols-3 gap-6 mb-8">
@@ -255,6 +301,49 @@ export default function AppFinanceiroPremiumAlpha() {
             </div>
           </div>
         </section>
+        {modalReceitasAberto && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="w-full max-w-xl rounded-3xl bg-zinc-950 border border-emerald-500/40 p-6 shadow-2xl">
+              <h2 className="text-3xl font-black mb-5">Editar entradas</h2>
+
+              <div className="space-y-4">
+                <input
+                  type="number"
+                  value={receitas.salario}
+                  onChange={(e) => setReceitas({ ...receitas, salario: Number(e.target.value) })}
+                  placeholder="Salário"
+                  className="w-full bg-black border border-zinc-800 rounded-2xl px-4 py-3 outline-none focus:border-emerald-500"
+                />
+
+                <input
+                  type="number"
+                  value={receitas.valeAlimentacao}
+                  onChange={(e) => setReceitas({ ...receitas, valeAlimentacao: Number(e.target.value) })}
+                  placeholder="Vale alimentação"
+                  className="w-full bg-black border border-zinc-800 rounded-2xl px-4 py-3 outline-none focus:border-emerald-500"
+                />
+
+                <input
+                  type="number"
+                  value={receitas.extras}
+                  onChange={(e) => setReceitas({ ...receitas, extras: Number(e.target.value) })}
+                  placeholder="Dinheiro extra"
+                  className="w-full bg-black border border-zinc-800 rounded-2xl px-4 py-3 outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button onClick={() => setModalReceitasAberto(false)} className="flex-1 bg-emerald-600 hover:bg-emerald-700 rounded-2xl py-4 font-bold">
+                  Salvar entradas
+                </button>
+                <button onClick={() => setModalReceitasAberto(false)} className="flex-1 bg-zinc-800 hover:bg-zinc-700 rounded-2xl py-4 font-bold">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {modalAberto && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="w-full max-w-xl rounded-3xl bg-zinc-950 border border-purple-500/40 p-6 shadow-2xl">
