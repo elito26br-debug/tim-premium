@@ -128,7 +128,7 @@ export default function AppFinanceiroPremiumAlpha() {
     setModalAberto(true);
   }
 
-  function apagarConta(id) {
+  function apagarConta(id: number) {
     setContas((atuais) => atuais.filter((conta) => conta.id !== id));
   }
 
