@@ -19,6 +19,7 @@ const contasIniciais = [
   { id: 12, categoria: 'Empréstimo', nome: 'Denilson', valor: 1040.00, vencimento: '2026-06-08', status: 'EM ABERTO', obs: 'Inclui juros de 30%' },
 ];
 
+
 const cartoesIniciais = [
   {
     id: 1,
