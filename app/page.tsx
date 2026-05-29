@@ -250,6 +250,48 @@ export default function AppFinanceiroPremiumAlpha() {
           </div>
         </section>
 
+
+
+<section className="rounded-3xl bg-zinc-950 border border-zinc-800 p-5 md:p-6 shadow-2xl mb-8">
+  <h2 className="text-2xl font-black mb-5 flex items-center gap-2">
+    <CreditCard className="text-purple-400" />
+    Meus Cartões
+  </h2>
+
+  <div className="grid md:grid-cols-3 gap-4">
+    {cartoesIniciais.map((cartao) => {
+      const disponivel = cartao.limite - cartao.usado;
+      const percentual = Math.min((cartao.usado / cartao.limite) * 100, 100);
+
+      return (
+        <div key={cartao.id} className="bg-black rounded-3xl p-5 border border-zinc-800">
+          <p className="text-zinc-400 text-sm">Cartão</p>
+          <h3 className="text-2xl font-black">{cartao.nome}</h3>
+
+          <div className="mt-4 space-y-2">
+            <p>Limite total: <b>{moeda(cartao.limite)}</b></p>
+            <p>Usado: <b className="text-red-400">{moeda(cartao.usado)}</b></p>
+            <p>Disponível: <b className={disponivel >= 0 ? "text-emerald-400" : "text-red-400"}>{moeda(disponivel)}</b></p>
+            <p className="text-zinc-400">Vencimento: dia {cartao.vencimento}</p>
+          </div>
+
+          <div className="w-full bg-zinc-800 h-3 rounded-full mt-4 overflow-hidden">
+            <div
+              className="h-full bg-purple-500"
+              style={{ width: `${percentual}%` }}
+            />
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</section>
+
+
+
+
+
+
         <section className="grid lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2 rounded-3xl bg-zinc-950 border border-zinc-800 p-5 md:p-6 shadow-2xl">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
